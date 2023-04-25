@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/mvc
+                        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                        http://www.springframework.org/schema/tx
+                        http://www.springframework.org/schema/tx/spring-tx.xsd
+                        http://www.springframework.org/schema/context
+                        http://www.springframework.org/schema/context/spring-context.xsd">
+    <!-- 事务管理器  -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--
+        开启事务控制的注解支持
+        注意：此处必须加入proxy-target-class="true"，
+              需要进行事务控制，会由Spring框架产生代理对象，
+              Dubbo需要将Service发布为服务，要求必须使用cglib创建代理对象。
+        在 Dubbo 中，服务提供者需要向注册中心发布自己的服务，从而使消费者可以通过订阅该服务来调用其提供的服务。
+
+具体实现时，它采用代理模式将 provider 暴露给了 consumer。为了完成这个代理工作，Dubbo 使用了动态代理技术，其中 JDK 动态代理缺乏 Cglib 一些特殊功能（如方法拦截、参数判断）,因此Cglib就成为使用更加合适的方案之一。
+
+因此，在 Dubbo 的架构体系当中，把 Service 注册到 Registry 上是一个必须要完成的任务，同时为保证服务能够被正常工作，也需借助第三方库cglib来生成转发模型以及隐藏真实Service实现类的灵活性。
+
+总而言之，在这样大规模网络环境下，避免传统RMI等基于IP地址定位分布系统资源耗费时间和资金高，且无法容易地进行负载均衡和故障容错处理时，选择Dubbo依托开源rpc通信框架和设计良好的协议体系将业务暴露出去变得非常明智。
+    -->
+    <tx:annotation-driven transaction-manager="transactionManager"
+                          proxy-target-class="true"/>
+</beans>
